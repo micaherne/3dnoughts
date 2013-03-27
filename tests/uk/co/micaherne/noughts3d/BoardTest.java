@@ -2,10 +2,14 @@ package uk.co.micaherne.noughts3d;
 
 import static org.junit.Assert.*;
 
+import java.util.Map;
 import java.util.Set;
+
+import javax.naming.spi.DirStateFactory.Result;
 
 import org.junit.Before;
 import org.junit.Test;
+
 
 public class BoardTest {
 
@@ -56,7 +60,44 @@ public class BoardTest {
 	
 	@Test
 	public void testGenerateLines() {
-		assertEquals(65, board.lines.size());
+		assertEquals(47, board.lines.size());
+		Line l = new Line();
+		l.squares.add(new Square(0, 5));
+		l.squares.add(new Square(1, 5));
+		l.squares.add(new Square(2, 5));
+		assertTrue(board.lines.contains(l));
+	}
+	
+	@Test
+	public void testCheckLine() throws IllegalMoveException {
+		board.move(5);
+		board.move(5);
+		board.move(5);
+		
+		Line l = new Line();
+		l.squares.add(new Square(0, 5));
+		l.squares.add(new Square(1, 5));
+		l.squares.add(new Square(2, 5));
+		
+		Map<Board.State, Integer> result = board.checkLine(l);
+		Integer r1 = result.get(Board.State.O);
+		assertEquals(2, r1.longValue());
+		Integer r2 = result.get(Board.State.X);
+		assertEquals(1, r2.longValue());
+		Integer r3 = result.get(Board.State.EMPTY);
+		assertEquals(0, r3.longValue());
+	}
+	
+	@Test
+	public void testWin() throws IllegalMoveException {
+		board.move(5);
+		board.move(6);
+		board.move(5);
+		board.move(6);
+		assertNull(board.getWinner());
+		board.move(5);
+		assertEquals(Board.Player.O, board.getWinner());
+		System.out.println(board);
 	}
 
 }
