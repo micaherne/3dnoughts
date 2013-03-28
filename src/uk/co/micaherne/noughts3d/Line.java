@@ -23,6 +23,10 @@ public class Line {
 		result = prime * result + ((squares == null) ? 0 : squares.hashCode());
 		return result;
 	}
+	
+	public boolean containsSquare(Square square) {
+		return squares.contains(square);
+	}
 
 	@Override
 	public boolean equals(Object obj) {

@@ -2,6 +2,7 @@ package uk.co.micaherne.noughts3d;
 
 import static org.junit.Assert.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,7 +49,7 @@ public class BoardTest {
 	
 	@Test
 	public void testMoveGen() throws IllegalMoveException {
-		Set<Integer> legalMoves = board.moveGen();
+		List<Integer> legalMoves = board.moveGen();
 		assertEquals(9, legalMoves.size());
 		board.move(4);
 		board.move(4);
@@ -97,7 +98,25 @@ public class BoardTest {
 		assertNull(board.getWinner());
 		board.move(5);
 		assertEquals(Board.Player.O, board.getWinner());
-		System.out.println(board);
+	}
+	
+	@Test
+	public void testEvaluate() throws IllegalMoveException {
+		board.move(5);
+		board.move(6);
+		board.move(5);
+		board.move(6);
+		board.move(5);
+		assertEquals(Board.Player.O, board.getWinner());
+		assertTrue(-0.9 > board.evaluate());
+	}
+	
+	@Test
+	public void testBestMove() throws Exception {
+		board.move(5);
+		board.move(6);
+		board.move(5);
+		assertEquals(5, board.bestMove(4));
 	}
 
 }
