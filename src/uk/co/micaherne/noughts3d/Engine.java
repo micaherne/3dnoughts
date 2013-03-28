@@ -12,24 +12,30 @@ public class Engine {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		
 		boolean play = true;
+		boolean humanStarts = false;
 		
 		while(play) {
 			board.init();
 			
 			while (board.getWinner() == null) {
-				if (board.noughtsToMove) {
+				if (board.noughtsToMove == humanStarts) {
 					System.out.println(board);
 					System.out.println("Your move");
 					String humanMove = br.readLine();
+					if("help".equals(humanMove)) {
+						board.bestMove(8);
+						continue;
+					}
 					Integer humanMoveInt = Integer.parseInt(humanMove);
 					board.move(humanMoveInt);
-					
-					if (board.getWinner() == null) {
-						int move = board.bestMove(5);
-						System.out.println("My move: " + move);
-						board.move(move);
-					}
+				}	
+				
+				if (board.getWinner() == null) {
+					int move = board.bestMove(8);
+					System.out.println("My move: " + move);
+					board.move(move);
 				}
+
 			}
 			
 			System.out.println(board.getWinner() + " wins!!");

@@ -176,7 +176,7 @@ public class Board {
 				result.add(j);
 			}
 		}
-		Collections.shuffle(result);
+		// Collections.shuffle(result);
 		return result;
 	}
 
@@ -210,8 +210,8 @@ public class Board {
 		double maxEvaluation = 1;
 		
 		// Weightings for the different metrics
-		double qualityWeight = 1;
-		double nearlysWeight = 2;
+		double qualityWeight = 0; // 1;
+		double nearlysWeight = 0; //2;
 		
 		// first check if someone has won
 		Player winner = getWinner();
@@ -298,11 +298,20 @@ public class Board {
 		double max = Double.NEGATIVE_INFINITY;
 		int result = -1;
 		// Check the value of each possible move
+		
 		for(Integer move : legalMoves) {
+			System.out.println("Analysing " + move);
 			move(move);
 			double score = -negamaxAB(this, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 			// System.out.println("Move score: " + move + " = " + score);
 			undoMove(move);
+			if (score == 1) {
+				System.out.println("wins");
+			} else if (score == -1) {
+				System.out.println("loses");
+			} else {
+				System.out.println("unclear");
+			}
 			if (score > max) {
 				result = move;
 				// System.out.println("Best move so far: " + result);

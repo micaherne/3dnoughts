@@ -133,14 +133,24 @@ public class BoardTest {
 		
 		board.init();
 		board.importPosition("+OO +++ +++ +X+ XX+ +++ OXO +++ +O+");
-		System.out.println(board);;
 		assertEquals(4, board.bestMove(1));
 		assertEquals(4, board.bestMove(2));
 		assertEquals(4, board.bestMove(3));
 		assertEquals(4, board.bestMove(4));
+		
+		board.init();
+		board.importPosition("+++ +++ +++ +O+ +X+ +++ O++ +++ +++");
 		System.out.println(board);
+		assertEquals(8, board.bestMove(1));
+		assertEquals(8, board.bestMove(2));
+		assertEquals(8, board.bestMove(3)); // by here it has realised it's lost
+		assertEquals(8, board.bestMove(4));
+			
 	}
 	
-
+	@Test
+	public void testDepth() throws NoValidMovesException, IllegalMoveException {
+		System.out.println(board.bestMove(8));
+	}
 
 }
