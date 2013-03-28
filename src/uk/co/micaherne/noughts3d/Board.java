@@ -118,10 +118,23 @@ public class Board {
 		lines.add(line);
 		
 		line = new Line();
+		line.squares.add(new Square(0, 8));
+		line.squares.add(new Square(1, 4));
+		line.squares.add(new Square(2, 0));
+		lines.add(line);
+		
+		line = new Line();
 		line.squares.add(new Square(0, 2));
 		line.squares.add(new Square(1, 4));
 		line.squares.add(new Square(2, 6));
 		lines.add(line);
+		
+		line = new Line();
+		line.squares.add(new Square(0, 6));
+		line.squares.add(new Square(1, 4));
+		line.squares.add(new Square(2, 2));
+		lines.add(line);
+
 	}
 
 	public State getSquareState(int i, int j) {
@@ -287,7 +300,7 @@ public class Board {
 		// Check the value of each possible move
 		for(Integer move : legalMoves) {
 			move(move);
-			double score = -negamax(this, depth);
+			double score = -negamaxAB(this, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 			// System.out.println("Move score: " + move + " = " + score);
 			undoMove(move);
 			if (score > max) {
@@ -326,7 +339,27 @@ public class Board {
 		return max;
 	}
 
-	
+	public double negamaxAB(Board board, int depth, double alpha, double beta) throws IllegalMoveException {
+		List<Integer> legalMoves = board.moveGen();
+		
+		if (board.gameOver() || legalMoves.size() == 0 || depth == 0) {
+			return board.evaluate();
+		}
+		
+		for(Integer move : legalMoves) {
+			board.move(move);
+			double score = -negamaxAB(board, depth - 1, -beta, -alpha);
+			board.undoMove(move);
+			if (score >= beta) {
+				return beta;
+			}
+			if (score > alpha) {
+				alpha = score;
+			}
+		}
+		
+		return alpha;
+	}
 
 	@Override
 	public String toString() {

@@ -61,7 +61,7 @@ public class BoardTest {
 	
 	@Test
 	public void testGenerateLines() {
-		assertEquals(47, board.lines.size());
+		assertEquals(49, board.lines.size());
 		Line l = new Line();
 		l.squares.add(new Square(0, 5));
 		l.squares.add(new Square(1, 5));
@@ -90,7 +90,7 @@ public class BoardTest {
 	}
 	
 	@Test
-	public void testWin() throws IllegalMoveException {
+	public void testWin() throws IllegalMoveException, InvalidPositionException {
 		board.move(5);
 		board.move(6);
 		board.move(5);
@@ -98,6 +98,11 @@ public class BoardTest {
 		assertNull(board.getWinner());
 		board.move(5);
 		assertEquals(Board.Player.O, board.getWinner());
+		
+		board.init();
+		// winning line 0,6 1,4 2,2
+		board.importPosition("XO+ +++ +++ +X+ +X+ +O+ OXO +XO +OX");
+		assertEquals(Board.Player.X, board.getWinner());
 	}
 	
 	@Test
