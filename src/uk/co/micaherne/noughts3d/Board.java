@@ -203,12 +203,13 @@ public class Board {
 		// first check if someone has won
 		Player winner = getWinner();
 		if (winner != null) {
-			if (((winner == Player.O) && noughtsToMove) ||
+			/*if (((winner == Player.O) && noughtsToMove) ||
 					(winner == Player.X) && !noughtsToMove) {
 				return maxEvaluation;
 			} else {
 				return -maxEvaluation;
-			}
+			}*/
+			return -maxEvaluation;
 		}
 		
 		/* next, count up all the winning lines with one space and
@@ -277,28 +278,37 @@ public class Board {
 			throw new NoValidMovesException();
 		}
 		
+		if (gameOver()) {
+			throw new NoValidMovesException();
+		}
+		
 		double max = Double.NEGATIVE_INFINITY;
 		int result = -1;
 		// Check the value of each possible move
 		for(Integer move : legalMoves) {
 			move(move);
 			double score = -negamax(this, depth);
-			System.out.println("Move score: " + move + " = " + score);
+			// System.out.println("Move score: " + move + " = " + score);
 			undoMove(move);
 			if (score > max) {
 				result = move;
-				System.out.println("Best move so far: " + result);
+				// System.out.println("Best move so far: " + result);
 				max = score;
 			}
 		}
 		return result;
 	}
 	
+	public boolean gameOver() {
+		Player winner = getWinner();
+		return (winner != null);
+	}
+	
 	// Without alpha-beta pruning
 	public double negamax(Board board, int depth) throws IllegalMoveException {
 		List<Integer> legalMoves = board.moveGen();
-		Player winner = board.getWinner();
-		if (winner != null || legalMoves.size() == 0 || depth == 0) {
+		
+		if (board.gameOver() || legalMoves.size() == 0 || depth == 0) {
 			return board.evaluate();
 		}
 		
@@ -345,5 +355,38 @@ public class Board {
 		}
 		
 		return result;
+	}
+
+	public void importPosition(String position) throws InvalidPositionException {
+		String[] parts = position.trim().split(" ");
+		if (parts.length != 9) {
+			throw new InvalidPositionException();
+		}
+		
+		int noughts = 0;
+		int crosses = 0;
+		
+		for(int a = 0; a < 9; a++) {
+			int i = a % 3;
+			for(int b = 0; b < 3; b++) {
+				int j = 6 - ((a / 3) * 3) + b;
+				switch(parts[a].charAt(b)) {
+				case 'O':
+					setSquareState(i, j, State.O);
+					noughts++;
+					break;
+				case 'X':
+					setSquareState(i, j, State.X);
+					crosses++;
+					break;
+				case '+':
+					setSquareState(i, j, State.EMPTY);
+					break;
+					
+				}
+			}
+			
+		}
+		noughtsToMove = (noughts == crosses);
 	}
 }

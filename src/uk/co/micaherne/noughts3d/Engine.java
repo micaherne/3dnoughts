@@ -25,7 +25,7 @@ public class Engine {
 					board.move(humanMoveInt);
 					
 					if (board.getWinner() == null) {
-						int move = board.bestMove(3);
+						int move = board.bestMove(5);
 						System.out.println("My move: " + move);
 						board.move(move);
 					}

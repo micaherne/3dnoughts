@@ -111,12 +111,31 @@ public class BoardTest {
 		assertTrue(-0.9 > board.evaluate());
 	}
 	
+	@Test 
+	public void testImportPosition() throws InvalidPositionException {
+		board.importPosition("+O+ +++ +++ +X+ +X+ +++ OXO +X+ +O+");
+		assertEquals(Board.State.O, board.getSquareState(0, 0));
+		assertTrue(board.noughtsToMove);
+	}	
+	
 	@Test
 	public void testBestMove() throws Exception {
 		board.move(5);
 		board.move(6);
 		board.move(5);
+		board.move(6);
 		assertEquals(5, board.bestMove(4));
+		
+		board.init();
+		board.importPosition("+OO +++ +++ +X+ XX+ +++ OXO +++ +O+");
+		System.out.println(board);;
+		assertEquals(4, board.bestMove(1));
+		assertEquals(4, board.bestMove(2));
+		assertEquals(4, board.bestMove(3));
+		assertEquals(4, board.bestMove(4));
+		System.out.println(board);
 	}
+	
+
 
 }
