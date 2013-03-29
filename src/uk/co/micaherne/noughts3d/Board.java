@@ -24,8 +24,12 @@ public class Board {
 	public State[][] squares;
 	public Set<Line> lines;
 	
-	public boolean noughtsToMove = true;
+	public Map<String, Double> evaluationCache = new HashMap<String, Double>();
+	public Integer evaluationCacheUsage = 0;
 	
+	public boolean noughtsToMove = true;
+	private boolean useCache = true;
+		
 	public void init() {
 		squares = new State[3][9];
 		for(int i = 0; i < 3; i++) {
@@ -176,7 +180,7 @@ public class Board {
 				result.add(j);
 			}
 		}
-		// Collections.shuffle(result);
+		Collections.shuffle(result);
 		return result;
 	}
 
@@ -206,85 +210,46 @@ public class Board {
 	}
 	
 	public double evaluate() {
-		double result = 0;
 		double maxEvaluation = 1;
 		
-		// Weightings for the different metrics
-		double qualityWeight = 0; // 1;
-		double nearlysWeight = 0; //2;
+		String evaluationCacheKey = null;
 		
+		if (useCache ) {
+			evaluationCacheKey = evaluationCacheKey();
+			if(evaluationCache.containsKey(evaluationCacheKey)) {
+				evaluationCacheUsage++;
+				return evaluationCache.get(evaluationCacheKey);
+			}
+		}
+		
+		double result;
 		// first check if someone has won
 		Player winner = getWinner();
 		if (winner != null) {
-			/*if (((winner == Player.O) && noughtsToMove) ||
-					(winner == Player.X) && !noughtsToMove) {
-				return maxEvaluation;
-			} else {
-				return -maxEvaluation;
-			}*/
-			return -maxEvaluation;
-		}
-		
-		/* next, count up all the winning lines with one space and
-		 * two marks for each side
-		 */
-		int nearlysNoughts = 0;
-		int nearlysCrosses = 0;
-		for(Line l : lines) {
-			Map<State, Integer> check = checkLine(l);
-			if (check.get(State.O) == 2 && check.get(State.EMPTY) == 1) {
-				nearlysNoughts++;
-			} else if (check.get(State.X) == 2 && check.get(State.EMPTY) == 1) {
-				nearlysCrosses++;
-			}
-		}
-		
-		/* 
-		 * Next, for each mark for each side, count the number of lines
-		 * it belongs to. Could be improved by checking the line doesn't have
-		 * any opposing marks on it (although this could interfere with the
-		 * count above)
-		 */
-		int qualityNoughts = 0;
-		int qualityCrosses = 0;
-		for(int i = 0; i < 3; i++) {
-			for (int j = 0; j < 9; j++) {
-				if (getSquareState(i, j) != State.EMPTY) {
-					Square square = new Square(i, j);
-					for (Line l : lines) {
-						if (l.containsSquare(square)) {
-							if (getSquareState(i, j) == State.O) {
-								qualityNoughts++;
-							} else if (getSquareState(i, j) == State.X){
-								qualityCrosses++;
-							}
-						}
-					}
-				}
-			}
-		}
-		
-		/*System.out.println("qualityNoughts: " + qualityNoughts);
-		System.out.println("qualityCrosses: " + qualityCrosses);
-		System.out.println("nearlysNoughts: " + nearlysNoughts);
-		System.out.println("nearlysCrosses: " + nearlysCrosses);*/
-		
-		/*
-		 * Weight the two measures and correct sign for side to move
-		 */
-		double scoreNoughts = (nearlysWeight * nearlysNoughts) + (qualityWeight * qualityNoughts);
-		double scoreCrosses = (nearlysWeight * nearlysCrosses) + (qualityWeight * qualityCrosses);
-		
-		double normalisedEval = scoreNoughts / (scoreNoughts + scoreCrosses);
-		if (noughtsToMove) {
-			result = normalisedEval;
+			result = -maxEvaluation;
 		} else {
-			result = -normalisedEval;
+			result = 0;
 		}
+		
+		if (useCache) {
+			evaluationCache.put(evaluationCacheKey, result);
+		}
+			
 		return result;
 	}
 	
+	public String evaluationCacheKey() {
+		StringBuffer result = new StringBuffer();
+		for(int i = 0; i < 3; i++) {
+			for(int j = 0; j < 9; j++) {
+				result.append(squares[i][j]);
+			}
+		}
+		return result.toString();
+	}
+	
 	public int bestMove(int depth) throws NoValidMovesException, IllegalMoveException {
+		
 		List<Integer> legalMoves = moveGen();
 
 		if (legalMoves.size() == 0) {
@@ -318,6 +283,7 @@ public class Board {
 				max = score;
 			}
 		}
+		
 		return result;
 	}
 	
@@ -326,28 +292,6 @@ public class Board {
 		return (winner != null);
 	}
 	
-	// Without alpha-beta pruning
-	public double negamax(Board board, int depth) throws IllegalMoveException {
-		List<Integer> legalMoves = board.moveGen();
-		
-		if (board.gameOver() || legalMoves.size() == 0 || depth == 0) {
-			return board.evaluate();
-		}
-		
-		double max = Double.NEGATIVE_INFINITY;
-		
-		// Check the value of each possible move
-		for(Integer move : legalMoves) {
-			board.move(move);
-			double score = -negamax(board, depth - 1);
-			board.undoMove(move);
-			if (score > max) {
-				max = score;
-			}
-		}
-		return max;
-	}
-
 	public double negamaxAB(Board board, int depth, double alpha, double beta) throws IllegalMoveException {
 		List<Integer> legalMoves = board.moveGen();
 		
@@ -357,6 +301,7 @@ public class Board {
 		
 		for(Integer move : legalMoves) {
 			board.move(move);
+			
 			double score = -negamaxAB(board, depth - 1, -beta, -alpha);
 			board.undoMove(move);
 			if (score >= beta) {
@@ -369,7 +314,7 @@ public class Board {
 		
 		return alpha;
 	}
-
+	
 	@Override
 	public String toString() {
 		String result = " 1   2   3\n--- --- ---\n";
@@ -431,4 +376,5 @@ public class Board {
 		}
 		noughtsToMove = (noughts == crosses);
 	}
+	
 }
